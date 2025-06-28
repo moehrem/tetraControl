@@ -1,0 +1,13 @@
+{
+  "domain": "radiocontrol",
+  "name": "radioControl",
+  "codeowners": ["@moehrem"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/moehrem/radioControl",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/moehrem/radioControl/issues",
+  "requirements": [],
+  "version": "0.1"
+}
