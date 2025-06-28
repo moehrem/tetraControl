@@ -1,0 +1,13 @@
+{
+  "domain": "tetracontrol",
+  "name": "tetraControl",
+  "codeowners": ["@moehrem"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/moehrem/tetraControl",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/moehrem/tetraControl/issues",
+  "requirements": [],
+  "version": "0.1"
+}
