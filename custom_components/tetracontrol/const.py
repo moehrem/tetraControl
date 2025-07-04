@@ -1,6 +1,6 @@
 """Constants for the tetraControl integration."""
 
-DOMAIN = "tetraControl"
+DOMAIN = "tetracontrol"
 VERSION = "0.1"
 MANUFACTURERS_LIST = ["Motorola", "TEST_MANUFACTURER"]
 
