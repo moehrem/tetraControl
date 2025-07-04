@@ -2,7 +2,7 @@
 
 DOMAIN = "tetracontrol"
 VERSION = "0.1"
-MANUFACTURERS_LIST = ["Motorola", "TEST_MANUFACTURER"]
+MANUFACTURERS_LIST = ["Motorola"]
 
 # Motorola specific constants
 BAUDRATE = 38400
