@@ -2,17 +2,24 @@
 
 The **tetraControl** integration allows you to connect and monitor TETRA radios (e.g., Motorola devices) via serial interface in [Home Assistant](https://www.home-assistant.io/). It provides real-time sensor data such as device status, location, and error messages.
 
+> This integration is NOT able to decode encrypted TETRA radio messages. You still need to have legal access to any source of decrypted data via a suitable hardware device.
+
+ATTENTION: The integration is in an early stage of development. Its neither feature complete nor polished or even fully tested. Thus please be aware of bugs. If you find one, I would be happy to receive an [issue](https://github.com/moehrem/tetraControl/issues). Many thanks!
+
+
 ## Features
 
 - Automatic detection and configuration of supported TETRA radios
 - Real-time status, location, and error reporting via Home Assistant sensors
 - Robust serial connection management with automatic reconnection
 - Support for Motorola radios (extendable for other manufacturers)
+- Based on ETSI EN 300 392-5 V2.5.1 (2016-10), ETSI EN 300 392-2 V3.8.1 (2016-08)
+
 
 ## Installation
 
 ### HACS (recommended)
-tetraCotnrol is not (yet) availbale via HACS directly, but you may install it manually:
+tetraControl is not (yet) availbale via HACS directly, but you may install it manually:
 1. [Install HACS](https://www.hacs.xyz/docs/use/), if not done already
 2. [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moehrem&repository=tetracontrol&category=Integration)
 3. **Installation:** Click "Download" in the bottom-right corner.
