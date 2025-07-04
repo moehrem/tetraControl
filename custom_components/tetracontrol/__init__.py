@@ -1,34 +1,31 @@
 """tetraControl integration for Home Assistant."""
 
-import logging
+# import logging
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.const import Platform
 
 from .const import DOMAIN
-from .coordinator import RCCoordinator
+from .coordinator import tetraControlCoordinator
 
-_LOGGER = logging.getLogger(__name__)
+# _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = ["sensor"]
+PLATFORMS = [Platform.SENSOR]
 
 
-async def async_setup(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up tetraControl from a config entry."""
-    _LOGGER.debug("Setting up tetraControl entry")
+async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    coordinator = tetraControlCoordinator(hass, config_entry)
+    await coordinator.async_start()
+    hass.data[DOMAIN] = coordinator
+    await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
 
-    coordinator = RCCoordinator(
-        hass=hass,
-        config_entry=entry,
-    )
+    return True
 
-    await coordinator.async_config_entry_first_refresh()
 
-    if DOMAIN not in hass.data:
-        hass.data[DOMAIN] = {}
-
-    hass.data[DOMAIN][entry.entry_id] = coordinator
-
-    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    coordinator: tetraControlCoordinator = hass.data[DOMAIN]
+    await coordinator.async_stop()
+    await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
 
     return True

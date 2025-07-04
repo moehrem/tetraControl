@@ -5,9 +5,9 @@
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/moehrem/tetraControl",
-  "integration_type": "hub",
+  "integration_type": "device",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/moehrem/tetraControl/issues",
-  "requirements": [],
+  "requirements": ["pyserial-asyncio"],
   "version": "0.1"
 }
