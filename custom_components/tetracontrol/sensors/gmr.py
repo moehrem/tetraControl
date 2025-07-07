@@ -1,14 +1,14 @@
-"""Sensor for CME data in TetraControl integration."""
+"""Sensor for "+GMI" data in TetraControl integration."""
 
 from .base import TetraBaseSensor
 
 
-class CMESensor(TetraBaseSensor):
-    """Sensor for CME data in TetraControl integration."""
+class GMRSensor(TetraBaseSensor):
+    """Sensor for "+GMR" data in TetraControl integration."""
 
     def __init__(self, coordinator, key, data) -> None:
-        """Initialize the CME sensor."""
-        self.device_id = coordinator.config_entry.data["device_id"]
+        """Initialize the GMR sensor."""
+        self.device_id = coordinator.config_entry.data.get("device_id")
         self.attr_name = data.get("sds_command_desc", "Unknown")
         self.attr_unique_id = (
             f"{data.get('sds_command_desc', 'Unknown')}_{self.device_id}"
@@ -18,7 +18,7 @@ class CMESensor(TetraBaseSensor):
 
     @property
     def state(self):
-        return self._data.get("sds_command_desc", "Unknown")
+        return self._data["revision"]
 
     @property
     def extra_state_attributes(self):

@@ -42,7 +42,7 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
                 await writer.drain()
                 response = await reader.read(1024)
                 # parse response
-                device_manufacturer, model, device_id, revision = self._parse_init_data(
+                device_manufacturer, device_id, revision = self._parse_init_data(
                     response
                 )
                 writer.close()
@@ -77,9 +77,9 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
                 data={
                     "serial_port": user_input["serial_port"],
                     "baudrate": user_input["baudrate"],
-                    "model": model,
                     "manufacturer": user_manufacturer,
                     "device_id": device_id,
+                    "model": device_id,
                     "revision": revision,
                 },
             )
@@ -127,11 +127,10 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
         return sorted(set(usable_devices))
 
     def _parse_init_data(self, response):
-        """Parse the initial response to extract manufacturer, model, and device ID."""
+        """Parse the initial response to extract manufacturer, and device ID."""
         # Beispielhafte Parsing-Logik, abhängig vom tatsächlichen Format der Antwort
         lines = response.decode("utf-8").splitlines()
         manufacturer = "Unknown"
-        model = "Unknown"
         device_id = "Unknown"
         revision = "Unknown"
 
@@ -139,9 +138,8 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
             if "+GMI:" in line:
                 manufacturer = line.split(":")[1].strip()
             elif "+GMM:" in line:
-                model = line.split(":")[1].strip().split(",")[0]
                 device_id = line.split(":")[1].strip().split(",")[1]
             elif "+GMR:" in line:
                 revision = line.split(":")[1].strip()
 
-        return manufacturer, model, device_id, revision
+        return manufacturer, device_id, revision
