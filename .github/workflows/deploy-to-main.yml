@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Wichtig: für Zugriff auf alle Branches
+          fetch-depth: 0
 
       - name: Set up Git
         run: |
@@ -36,16 +36,17 @@ jobs:
           git checkout dev -- .github/workflows
           git checkout dev -- hacs.json README.md LICENSE
 
-      - name: Show token length
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          echo "Token length: ${#GH_TOKEN}"
-
-      - name: Commit and push changes to main
-        env:
-          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+      - name: Commit changes
         run: |
           git add .
-          git commit -m "Deploy from dev branch"
-          git push https://x-access-token:${GH_TOKEN}@github.com/moehrem/tetraControl.git main
+          git commit -m "Deploy from dev branch" || echo "No changes to commit"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          commit-message: "Deploy from dev branch"
+          title: "Deploy from dev branch"
+          body: "Automated deployment from dev to main."
+          base: main
+          branch: deploy-to-main-auto
