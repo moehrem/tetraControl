@@ -2,7 +2,7 @@
 
 # general constants
 DOMAIN = "tetracontrol"
-VERSION = "0.2"
+VERSION = "0.3"
 MANUFACTURERS_LIST = ["Motorola"]
 SLEEP_TIME_CONNECTION_CHECK = 10  # Sleep time in seconds between connection checks
 MAX_RETRY_ATTEMPTS = 5  # Maximum number of attempts to connect to the device
