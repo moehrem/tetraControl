@@ -37,7 +37,9 @@ jobs:
           git checkout dev -- hacs.json README.md LICENSE
 
       - name: Commit and push changes to main
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git add .
           git commit -m "Deploy from dev branch"
-          git push origin main
+          git push https://x-access-token:${GH_TOKEN}@github.com/moehrem/tetraControl.git main
