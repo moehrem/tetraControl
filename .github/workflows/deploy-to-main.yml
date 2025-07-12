@@ -46,7 +46,8 @@ jobs:
         with:
           token: ${{ secrets.GH_TOKEN }}
           commit-message: "Deploy from dev branch"
-          title: "Deploy from dev branch"
+          title: "Deploy to main branch"
           body: "Automated deployment from dev to main."
           base: main
           branch: deploy-to-main-auto
+          delete-branch: true
