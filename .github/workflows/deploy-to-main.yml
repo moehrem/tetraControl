@@ -1,0 +1,43 @@
+name: Deploy to main
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Wichtig: für Zugriff auf alle Branches
+
+      - name: Set up Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Fetch all branches
+        run: git fetch --all
+
+      - name: Switch to main and clean
+        run: |
+          git checkout main
+          git rm -r . || true
+          git clean -fdx
+
+      - name: Copy production files from dev
+        run: |
+          git checkout dev -- custom_components
+          git checkout dev -- .github/workflows
+          git checkout dev -- hacs.json README.md LICENSE
+
+      - name: Commit and push changes to main
+        run: |
+          git add .
+          git commit -m "Deploy from dev branch"
+          git push origin main
