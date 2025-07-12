@@ -7,26 +7,23 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 class TetraBaseSensor(CoordinatorEntity, SensorEntity):
     """Base class for TetraControl sensors."""
 
-    def __init__(self, coordinator, name, unique_id, data) -> None:
+    def __init__(self, coordinator, key, data) -> None:
         """Initialize the TetraControl sensor.
 
         This class also serves as fallback handler for any messages with unknown tetra-commands. It will not handle messages without command!
 
         """
         super().__init__(coordinator)
-        self._attr_name = name
-        self._attr_unique_id = unique_id
-        self._data = data
+
+        # device details
         cfg = coordinator.config_entry.data
         self._manufacturer = cfg.get("manufacturer", "unknown")
         self._device_id = cfg.get("device_id", "unknown")
         self._model = cfg.get("model", "unknown")
         self._revision = cfg.get("revision", "unknown")
+        self.device_id = cfg.get("device_id", "unknown")
 
-    @property
-    def device_info(self):  # type: ignore
-        """Return device information for the sensor."""
-        return {
+        self._attr_device_info = {
             "identifiers": {
                 ("tetraControl", f"{self._manufacturer}_{self._device_id}")
             },
@@ -36,17 +33,19 @@ class TetraBaseSensor(CoordinatorEntity, SensorEntity):
             "sw_version": self._revision,
         }
 
-    @property
-    def native_value(self) -> str:  # type: ignore
-        """Return the current value of the sensor."""
-        return self._data.get("sds_command_desc", "Unknown Command")
+        # entity details
+        self.key = key
 
-    @property
-    def extra_state_attributes(self):  # type: ignore
-        """Return the state attributes of the sensor."""
-        return self._data
+        self._attr_name = key
+        self._attr_unique_id = f"{key}_{self.device_id}"
+        self._attr_native_value = data.get("sds_command_desc", "Unknown")
+        self._attr_extra_state_attributes = data
+        self._attr_should_poll = False
+        self._attr_icon = "mdi:message-question"
 
-    def update_data(self, data):
+    def update_entities(self, data):
         """Update the sensor data."""
-        self._data = data
+        self._attr_native_value = self.key
+        self._attr_extra_state_attributes = data
+
         self.async_write_ha_state()
