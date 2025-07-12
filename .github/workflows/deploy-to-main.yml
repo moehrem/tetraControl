@@ -36,6 +36,12 @@ jobs:
           git checkout dev -- .github/workflows
           git checkout dev -- hacs.json README.md LICENSE
 
+      - name: Show token length
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "Token length: ${#GH_TOKEN}"
+
       - name: Commit and push changes to main
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
