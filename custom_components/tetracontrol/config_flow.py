@@ -15,7 +15,7 @@ from homeassistant.config_entries import (
     ConfigEntryNotReady,
 )
 
-from .const import DOMAIN, MANUFACTURERS_LIST, VERSION
+from .const import DOMAIN, MANUFACTURERS_LIST, VERSION, MINOR_VERSION, PATCH_VERSION
 
 
 @dataclass
@@ -34,13 +34,17 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle a config flow for tetraControl."""
 
     VERSION = VERSION
+    MINOR_VERSION = MINOR_VERSION
+    PATCH_VERSION = PATCH_VERSION
 
     def __init__(self) -> None:
         """Initialize the config flow."""
         self.config_entry = tetraControlConfigEntry()
-        self.errors = {}
+        self.errors: dict[str, str] = {}
 
-    async def async_step_user(self, user_input=None) -> ConfigFlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, object] | None = None
+    ) -> ConfigFlowResult:
         """Handle the initial step of the config flow."""
 
         if user_input is not None:
@@ -93,7 +97,7 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
             errors=self.errors,
         )
 
-    def _get_serial_ports(self):
+    def _get_serial_ports(self) -> list[str]:
         """Return a filtered list of usable serial ports on the system."""
         devices = []
 
