@@ -5,11 +5,11 @@ import logging
 _LOGGER = logging.getLogger(__name__)
 
 
-class TetraControlHelpers:
+class TetrahaconnectHelpers:
     """Class for any helper method, that is not needed for a specific purpose only."""
 
     def __init__(self, coordinator) -> None:
-        """Initialize TetraControlHelpers."""
+        """Initialize tetraHAconnectHelpers."""
         self.coordinator = coordinator
 
     def update_connection_status(self, status):

@@ -10,7 +10,7 @@ from .com_manager import COMManager
 _LOGGER = logging.getLogger(__name__)
 
 
-class tetraControlCoordinator(DataUpdateCoordinator):
+class TetrahaconnectCoordinator(DataUpdateCoordinator):
     """Coordinator to manage COM data for TetraHAConnect."""
 
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:

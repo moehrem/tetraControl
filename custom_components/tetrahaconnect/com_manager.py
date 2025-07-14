@@ -8,7 +8,7 @@ import serial
 import serial_asyncio
 
 from .const import MAX_RETRY_ATTEMPTS, SLEEP_TIME_CONNECTION_CHECK, SLEEP_TIME_RETRY
-from .helpers import TetraControlHelpers
+from .helpers import TetrahaconnectHelpers
 from .motorola import Motorola
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,7 +26,7 @@ class COMManager:
         self.protocol = None
         self._connection_check_task = None
 
-        self.helpers = TetraControlHelpers(coordinator)
+        self.helpers = TetrahaconnectHelpers(coordinator)
 
     async def start(self, hass):
         """Start monitoring and connection loop."""
@@ -160,7 +160,7 @@ class serial_handler(asyncio.Protocol):
         self.raw_data = b""
 
         self.motorola = Motorola(coordinator)
-        self.helpers = TetraControlHelpers(coordinator)
+        self.helpers = TetrahaconnectHelpers(coordinator)
 
     def connection_made(self, transport):
         """Handle the connection being made."""

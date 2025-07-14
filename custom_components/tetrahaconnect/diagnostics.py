@@ -38,13 +38,13 @@ async def async_get_config_entry_diagnostics(
 
     # Read and filter logs for TetraHAConnect
     log_path = "config/home-assistant.log"
-    tetracontrol_logs = await hass.async_add_executor_job(_read_log, log_path)
+    Tetrahaconnect_logs = await hass.async_add_executor_job(_read_log, log_path)
 
     return {
         "entry_data": async_redact_data(data, TO_REDACT),
         "options": async_redact_data(options, TO_REDACT),
         "runtime_data": getattr(entry, "runtime_data", None),
-        "logs": tetracontrol_logs,
+        "logs": Tetrahaconnect_logs,
     }
 
 
