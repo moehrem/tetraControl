@@ -1,4 +1,4 @@
-"""Several unils and tool helping handling of TetraHAConnect."""
+"""Several unils and tool helping handling of tetraHAconnect."""
 
 import logging
 

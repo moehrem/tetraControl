@@ -1,4 +1,4 @@
-"""Constants for the TetraHAConnect integration."""
+"""Constants for the tetraHAconnect integration."""
 
 # general constants
 DOMAIN = "tetrahaconnect"

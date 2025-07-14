@@ -1,4 +1,4 @@
-"""Sensor for invalid data in TetraHAConnect integration."""
+"""Sensor for invalid data in tetraHAconnect integration."""
 
 from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@ from .base import TetraBaseSensor
 
 
 class TetraInvalid(TetraBaseSensor):
-    """Sensor for invalid data in TetraHAConnect integration."""
+    """Sensor for invalid data in tetraHAconnect integration."""
 
     def __init__(self, coordinator, key, data) -> None:
         """Initialize the GMM sensor."""

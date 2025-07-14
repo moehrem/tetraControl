@@ -1,4 +1,4 @@
-"""Sensor for "+GMM" / model identification data in TetraHAConnect integration."""
+"""Sensor for "+GMM" / model identification data in tetraHAconnect integration."""
 
 from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@ from .base import TetraBaseSensor
 
 
 class GMMSensor(TetraBaseSensor):
-    """Sensor for "+GMM" data in TetraHAConnect integration."""
+    """Sensor for "+GMM" data in tetraHAconnect integration."""
 
     def __init__(self, coordinator, key, data) -> None:
         """Initialize the GMM sensor."""

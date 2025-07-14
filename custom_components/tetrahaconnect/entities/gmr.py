@@ -1,4 +1,4 @@
-"""Sensor for "+GMR" / revision identification data in TetraHAConnect integration."""
+"""Sensor for "+GMR" / revision identification data in tetraHAconnect integration."""
 
 from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@ from .base import TetraBaseSensor
 
 
 class GMRSensor(TetraBaseSensor):
-    """Sensor for "+GMR" data in TetraHAConnect integration."""
+    """Sensor for "+GMR" data in tetraHAconnect integration."""
 
     def __init__(self, coordinator, key, data) -> None:
         """Initialize the GMR sensor."""

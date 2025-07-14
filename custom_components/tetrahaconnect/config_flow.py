@@ -1,4 +1,4 @@
-"""Config flow to configure the TetraHAConnect integration."""
+"""Config flow to configure the tetraHAconnect integration."""
 
 import asyncio
 from dataclasses import dataclass

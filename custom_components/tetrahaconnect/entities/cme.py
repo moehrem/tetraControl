@@ -1,4 +1,4 @@
-"""Sensor for CME / error data in TetraHAConnect integration."""
+"""Sensor for CME / error data in tetraHAconnect integration."""
 
 from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@ from .base import TetraBaseSensor
 
 
 class CMESensor(TetraBaseSensor):
-    """Sensor for CME data in TetraHAConnect integration."""
+    """Sensor for CME data in tetraHAconnect integration."""
 
     def __init__(self, coordinator, key, data) -> None:
         """Initialize the CME sensor."""

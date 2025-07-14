@@ -329,7 +329,7 @@ class Motorola:
                 case _:
                     self._motorola_variables["unknown_command_message"] = raw_message
                     _LOGGER.warning(
-                        "Received SDS command: %s, message %s. No handling implemented yet, please report this to the developer via https://github.com/moehrem/TetraHAConnect/issues",
+                        "Received SDS command: %s, message %s. No handling implemented yet, please report this to the developer via https://github.com/moehrem/tetraHAconnect/issues",
                         self._motorola_variables["sds_command"],
                         message,
                     )

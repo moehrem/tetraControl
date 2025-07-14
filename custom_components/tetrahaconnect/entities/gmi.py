@@ -1,4 +1,4 @@
-"""Sensor for "+GMI" / manufacturer identification data in TetraHAConnect integration."""
+"""Sensor for "+GMI" / manufacturer identification data in tetraHAconnect integration."""
 
 from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@ from .base import TetraBaseSensor
 
 
 class GMISensor(TetraBaseSensor):
-    """Sensor for "+GMI" data in TetraHAConnect integration."""
+    """Sensor for "+GMI" data in tetraHAconnect integration."""
 
     def __init__(self, coordinator, key, data) -> None:
         """Initialize the GMI sensor."""

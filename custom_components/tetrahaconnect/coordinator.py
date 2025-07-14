@@ -1,4 +1,4 @@
-"""Coordinator for TetraHAConnect integration."""
+"""Coordinator for tetraHAconnect integration."""
 
 import logging
 from homeassistant.core import HomeAssistant
@@ -11,7 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class TetrahaconnectCoordinator(DataUpdateCoordinator):
-    """Coordinator to manage COM data for TetraHAConnect."""
+    """Coordinator to manage COM data for tetraHAconnect."""
 
     def __init__(self, hass: HomeAssistant, config_entry: ConfigEntry) -> None:
         """Initialize the coordinator."""
