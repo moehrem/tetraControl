@@ -127,26 +127,31 @@ class COMManager:
         _LOGGER.info("Initializing TETRA device on %s", self.com_port)
 
         device_commands = ["ATZ\r\n", "AT+GMI?\r\n", "AT+GMM?\r\n", "AT+GMR?\r\n"]
-        service_commands = [
-            # "AT+CTSP=1,2,20\r\n",  # Status TE
-            "AT+CTSP=2,2,20\r\n",  # Status MT & TE
-            "AT+CTSP=1,3,130\r\n",  # Textnachrichten einschalten
-            "AT+CTSP=1,3,131\r\n",  # GPS einschalten
-            "AT+CTSP=1,3,10\r\n",  # Status GPS
-            "AT+CTSP=1,3,137\r\n",  # Immediate Text
-            "AT+CTSP=1,3,138\r\n",  # Alarm
-        ]
+        # service_commands = [
+        #     # "AT+CTSP=1,2,20\r\n",  # Status TE
+        #     # "AT+CTSP=2,2,20\r\n",  # Status MT & TE
+        #     # "AT+CTSP=1,3,130\r\n",  # Textnachrichten einschalten
+        #     # "AT+CTSP=1,3,131\r\n",  # GPS einschalten
+        #     # "AT+CTSP=1,3,10\r\n",  # Status GPS
+        #     # "AT+CTSP=1,3,137\r\n",  # Immediate Text
+        #     # "AT+CTSP=1,3,138\r\n",  # Alarm
+        #     "AT+CTSP=2,0\r\n",
+        #     "AT+CTSP=2,1\r\n",
+        #     "AT+CTSP=2,2\r\n",
+        #     "AT+CTSP=2,3\r\n",
+        #     "AT+CTSP=2,4\r\n",
+        # ]
         # +CTSP=<service profile>, <service layer1>, [<service layer2>], [<AI mode>], [<link identifier>]
 
         for cmd in device_commands:
-            _LOGGER.debug("Sending init command: %s", cmd.strip())
+            _LOGGER.debug("Sending initializing command: %s", cmd.strip())
             self.transport.write(cmd.encode())
             await asyncio.sleep(0.1)
 
-        for cmd in service_commands:
-            _LOGGER.debug("Sending service command: %s", cmd.strip())
-            self.transport.write(cmd.encode())
-            await asyncio.sleep(0.1)
+        # for cmd in service_commands:
+        #     _LOGGER.debug("Sending service profile command: %s", cmd.strip())
+        #     self.transport.write(cmd.encode())
+        #     await asyncio.sleep(0.1)
 
         _LOGGER.info("TETRA device initialized successfully on %s", self.com_port)
 

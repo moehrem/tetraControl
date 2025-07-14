@@ -2,12 +2,17 @@ import serial
 import time
 
 port = "/dev/pts/6"
-ser = serial.Serial(port, 9600, timeout=1)
-
-time.sleep(1)  # kurz warten, bis Verbindung steht
 
 strings = [
-    "\r\nOK\r\n\r\n+GMI: MOTOROLA\r\n\r\nOK\r\n\r\n+GMM: 54009,test_M83AAA1BB2CC,91.2.0.0\r\n\r\nOK\r\n\r\n+GMR: R11.222.3333\r\n\r\nOK\r\n\r\nOK\r\n\r\nOK\r\n\r\nOK\r\n\r\nOK\r\n\r\nOK\r\n\r\nOK\r\n",
+    "\r\nOK\r\n",
+    "\r\n+GMI: MOTOROLA\r\n",
+    "\r\n+GMM: 54009,test_M83AAA1BB2CC,91.2.0.0\r\n",
+    "\r\n+GMR: R11.222.3333\r\n",
+    "\r\nOK\r\n",
+    "\r\nOK\r\n",
+    "\r\nOK\r\n",
+    "\r\nOK\r\n",
+    "\r\nOK\r\n",
     # "\r\n+CTSDSR: 13,1234657,0,9876543,0,16\r\n8004\r\n",
     # "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-68GW-L2   01\r\n",
     # "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-43LF8/6   01\r\n",
@@ -763,6 +768,8 @@ strings = [
 ]
 
 for string in strings:
+    ser = serial.Serial(port, 9600, timeout=1)
+    time.sleep(0.2)  # kurz warten, bis Verbindung steht
     ser.write(string.encode("utf-8"))
-    time.sleep(0.1)
-ser.close()
+    time.sleep(0.2)
+    ser.close()
