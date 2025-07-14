@@ -1,4 +1,4 @@
-name: Create Release on main
+name: autocreate patch release
 
 on:
   push:
@@ -36,21 +36,28 @@ jobs:
           fi
           echo "next_tag=$next_tag" >> $GITHUB_OUTPUT
 
-      - name: Set prerelease flag
-        id: prerelease_flag
+
+      - name: Generate changelog
+        id: changelog
         run: |
-          next_tag="${{ steps.next_version.outputs.next_tag }}"
-          if [[ $next_tag =~ ^v0\. ]]; then
-            echo "prerelease=true" >> $GITHUB_OUTPUT
+          latest_tag="${{ steps.get_tag.outputs.latest_tag }}"
+          # List all commits since last tag
+          if [ "$latest_tag" = "v0.0.0" ]; then
+            range=""
           else
-            echo "prerelease=false" >> $GITHUB_OUTPUT
+            range="$latest_tag..HEAD"
           fi
+          git log $range --pretty=format:"- %s (%an)" > commits.txt
+          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          cat commits.txt >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.next_version.outputs.next_tag }}
-          name: Release ${{ steps.next_version.outputs.next_tag }}
+          name: Autorelease ${{ steps.next_version.outputs.next_tag }}
+          body: ${{ steps.changelog.outputs.commits }}
           generate_release_notes: true
           prerelease: ${{ steps.prerelease_flag.outputs.prerelease }}
         env:

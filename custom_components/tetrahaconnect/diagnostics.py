@@ -1,4 +1,4 @@
-"""Diagnostics support for tetraControl integration."""
+"""Diagnostics support for TetraHAConnect integration."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ TO_REDACT: set[str] = {
 def _read_log(log_path: str) -> list[str]:
     try:
         with Path(log_path).open("r", encoding="utf-8") as log_file:
-            return [line.rstrip() for line in log_file if "tetracontrol" in line]
+            return [line.rstrip() for line in log_file if "TetraHAConnect" in line]
     except OSError as ex:
         return [f"Log read error: {ex}"]
 
@@ -36,7 +36,7 @@ async def async_get_config_entry_diagnostics(
     data: dict[str, Any] = dict(entry.data)
     options: dict[str, Any] = dict(entry.options)
 
-    # Read and filter logs for tetracontrol
+    # Read and filter logs for TetraHAConnect
     log_path = "config/home-assistant.log"
     tetracontrol_logs = await hass.async_add_executor_job(_read_log, log_path)
 

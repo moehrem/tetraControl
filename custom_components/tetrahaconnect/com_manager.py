@@ -1,4 +1,4 @@
-# custom_components/tetracontrol/com_manager.py
+# custom_components/TetraHAConnect/com_manager.py
 
 import asyncio
 import contextlib

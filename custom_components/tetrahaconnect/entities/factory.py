@@ -1,4 +1,4 @@
-# """Contain factory function to create sensor instances for TetraControl integration."""
+# """Contain factory function to create sensor instances for TetraHAConnect integration."""
 
 # from .base import TetraBaseSensor
 # from .cme import CMESensor

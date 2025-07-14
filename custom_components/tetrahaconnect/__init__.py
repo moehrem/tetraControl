@@ -1,4 +1,4 @@
-"""tetraControl integration for Home Assistant."""
+"""TetraHAConnect integration for Home Assistant."""
 
 # import logging
 
@@ -15,7 +15,7 @@ PLATFORMS = [Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Set up tetraControl from a config entry."""
+    """Set up TetraHAConnect from a config entry."""
     coordinator = tetraControlCoordinator(hass, config_entry)
     await coordinator.async_start()
     hass.data[DOMAIN] = coordinator

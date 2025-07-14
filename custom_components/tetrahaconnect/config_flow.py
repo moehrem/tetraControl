@@ -1,4 +1,4 @@
-"""Config flow to configure the tetraControl."""
+"""Config flow to configure the TetraHAConnect."""
 
 import asyncio
 from dataclasses import dataclass
@@ -31,7 +31,7 @@ class tetraControlConfigEntry:
 
 
 class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for tetraControl."""
+    """Handle a config flow for TetraHAConnect."""
 
     VERSION = VERSION
     MINOR_VERSION = MINOR_VERSION

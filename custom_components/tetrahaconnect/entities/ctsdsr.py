@@ -1,4 +1,4 @@
-"""Sensor for CTSDRS data in TetraControl integration."""
+"""Sensor for CTSDRS data in TetraHAConnect integration."""
 
 from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@ from .base import TetraBaseSensor
 
 
 class CTSDRSSensor(TetraBaseSensor):
-    """Sensor for CTSDRS data in TetraControl integration."""
+    """Sensor for CTSDRS data in TetraHAConnect integration."""
 
     def __init__(self, coordinator, key, data) -> None:
         """Initialize the CTSDRS sensor."""

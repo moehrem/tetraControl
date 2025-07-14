@@ -1,10 +1,10 @@
-# tetraControl Home Assistant Integration
+# TetraHAConnect Home Assistant Integration
 
-The **tetraControl** integration allows you to connect and monitor TETRA radios (e.g., Motorola devices) via serial interface in [Home Assistant](https://www.home-assistant.io/). It provides real-time data by decoding decrypted TETRA messages into readable data.
+The **TetraHAConnect** integration allows you to connect and monitor TETRA radios (e.g., Motorola devices) via serial interface in [Home Assistant](https://www.home-assistant.io/). It provides real-time data by decoding decrypted TETRA messages into readable data.
 
 > This integration is NOT able to decode encrypted TETRA messages. You need to have legal access to any source of decrypted data via a suitable hardware device.
 
-ATTENTION: The integration is in an early stage of development. Its neither feature complete nor polished or even fully tested. Thus please be aware of bugs. If you find one, I would be happy to receive an [issue](https://github.com/moehrem/tetraControl/issues). Many thanks!
+ATTENTION: The integration is in an early stage of development. Its neither feature complete nor polished or even fully tested. Thus please be aware of bugs. If you find one, I would be happy to receive an [issue](https://github.com/moehrem/TetraHAConnect/issues). Many thanks!
 
 
 ## Features
@@ -27,20 +27,20 @@ If you know how to handle data from other manufacturers or you are able to suppl
 ## Installation
 
 ### HACS (recommended)
-tetraControl is not (yet) availbale via HACS, but you may install it manually into HACS:
+TetraHAConnect is not (yet) availbale via HACS, but you may install it manually into HACS:
 1. [Install HACS](https://www.hacs.xyz/docs/use/), if not done already
-2. [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moehrem&repository=tetracontrol&category=Integration)
+2. [![Add to HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=moehrem&repository=TetraHAConnect&category=Integration)
 3. **Installation:** Click "Download" in the bottom-right corner.
 
 ### Manual installation
-1. Copy the `custom_components/tetracontrol` directory into your Home Assistant `custom_components` folder.
+1. Copy the `custom_components/TetraHAConnect` directory into your Home Assistant `custom_components` folder.
 2. Restart Home Assistant.
 
 ## Configuration
 
 ### Via Home Assistant UI
 1. Go to **Settings** > **Devices & Services** > **Add Integration**.
-2. Search for **tetraControl** and follow the setup wizard:
+2. Search for **TetraHAConnect** and follow the setup wizard:
     - Select your device manufacturer.
     - Choose the serial port and baudrate.
     - The integration will auto-detect your device and complete setup.
