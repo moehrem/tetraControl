@@ -41,16 +41,13 @@ jobs:
         id: changelog
         run: |
           latest_tag="${{ steps.get_tag.outputs.latest_tag }}"
-          # List all commits since last tag
           if [ "$latest_tag" = "v0.0.0" ]; then
             range=""
           else
             range="$latest_tag..HEAD"
           fi
           git log $range --pretty=format:"- %s (%an)" > commits.txt
-          echo "commits<<EOF" >> $GITHUB_OUTPUT
-          cat commits.txt >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "commits=$(cat commits.txt | awk '{printf "%s\\n", $0}')" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
