@@ -4,6 +4,7 @@ import asyncio
 from dataclasses import dataclass
 from pathlib import Path
 import os
+import logging
 
 import serial
 import serial_asyncio
@@ -16,6 +17,8 @@ from homeassistant.config_entries import (
 )
 
 from .const import DOMAIN, MANUFACTURERS_LIST, VERSION, MINOR_VERSION, PATCH_VERSION
+
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
@@ -126,7 +129,17 @@ class TetrahaconnectConfigFlow(ConfigFlow, domain=DOMAIN):
 
     async def _request_device_data(self, config_entry: TetrahaconnectConfigEntry):
         """Request serial port and request device data."""
-        device_commands = ["ATZ\r\n", "AT+GMI?\r\n", "AT+GMM?\r\n", "AT+GMR?\r\n"]
+        device_commands = [
+            "ATZ\r\n",
+            "AT+GMI?\r\n",
+            "AT+GMM?\r\n",
+            "AT+GMR?\r\n",
+            "AT+CTSP=2,0\r\n",
+            "AT+CTSP=2,1\r\n",
+            "AT+CTSP=2,2\r\n",
+            "AT+CTSP=2,3\r\n",
+            "AT+CTSP=2,4\r\n",
+        ]
 
         try:
             reader, writer = await asyncio.wait_for(
@@ -141,42 +154,59 @@ class TetrahaconnectConfigFlow(ConfigFlow, domain=DOMAIN):
             ) from e
 
         # send initial commands to the device
+        raw_data = {}
         for cmd in device_commands:
             writer.write(cmd.encode("utf-8"))
+            await asyncio.sleep(0.1)
+            await writer.drain()
+            try:
+                response = await asyncio.wait_for(reader.read(1024), timeout=5)
+                raw_data[cmd] = response.strip()
+            except TimeoutError:
+                _LOGGER.error("Response timeout for command: %s", cmd.strip())
+                raw_data[cmd] = b""
 
-        await asyncio.sleep(1)
-        await writer.drain()
-
-        # wait for the response from the device
-        try:
-            response = await asyncio.wait_for(reader.read(1024), timeout=5)
-        except TimeoutError:
-            writer.close()
-            await writer.wait_closed()
-            raise TimeoutError from None
-
-        # parse response
-        self._parse_init_data(response)
         writer.close()
         await writer.wait_closed()
 
-    def _parse_init_data(self, response) -> None:
+        # parse response
+        self._parse_init_data(raw_data)
+
+    def _parse_init_data(self, raw_data) -> None:
         """Parse the initial response to extract manufacturer, and device ID."""
-        lines = response.decode("utf-8").splitlines()
+
         device_manufacturer = "Unknown"
         device_id = "Unknown"
         device_revision = "Unknown"
+        parsed_data = {}
 
-        for line in lines:
-            if "+GMI:" in line:
-                device_manufacturer = line.split(":")[1].strip()
-            elif "+GMM:" in line:
-                device_id = line.split(":")[1].strip().split(",")[1]
-            elif "+GMR:" in line:
-                device_revision = line.split(":")[1].strip()
+        for cmd, resp in raw_data.items():
+            resp = resp.decode("utf-8").strip()
+            cmd = cmd.replace("\r\n", "").strip()
+            parsed_data[cmd] = resp
 
-        # check manufacturer
-        self._check_manufacturer(device_manufacturer)
+        for cmd, resp in parsed_data.items():
+            if cmd == "AT+GMI?":
+                device_manufacturer = resp.split(":")[1].strip()
+                # check manufacturer
+                self._check_manufacturer(device_manufacturer)
+            elif cmd == "AT+GMM?":
+                device_id = resp.split(":")[1].strip().split(",")[1]
+            elif cmd == "AT+GMR?":
+                device_revision = resp.split(":")[1].strip()
+            elif cmd.startswith("AT+CTSP"):
+                if resp != "OK":
+                    _LOGGER.warning(
+                        "Service profile command %s failed with response: %s",
+                        cmd,
+                        resp,
+                    )
+                _LOGGER.debug(
+                    "Service profile command %s sucessful for device %s (%s)",
+                    cmd,
+                    device_id,
+                    device_manufacturer,
+                )
 
         self.config_entry.model = device_id
         self.config_entry.device_id = device_id

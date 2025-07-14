@@ -4,6 +4,7 @@ import logging
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.exceptions import ConfigEntryNotReady
 from .const import DOMAIN
 from .com_manager import COMManager
 
@@ -27,8 +28,13 @@ class TetrahaconnectCoordinator(DataUpdateCoordinator):
 
     async def async_start(self):
         """Start the COM manager."""
-        await self._com_manager.start(self.hass)
+        try:
+            await self._com_manager.serial_initialize(self.hass)
+            await self._com_manager.tetra_initialize()
+        except Exception as e:
+            _LOGGER.error(f"Failed to initialize COM manager: {e}")
+            raise ConfigEntryNotReady from e
 
     async def async_stop(self):
         """Stop the COM manager."""
-        await self._com_manager.stop()
+        await self._com_manager.serial_stop()
