@@ -53,7 +53,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.next_version.outputs.next_tag }}
-          name: Autorelease ${{ steps.next_version.outputs.next_tag }}
+          name: Patch ${{ steps.next_version.outputs.next_tag }}
           body: ${{ steps.changelog.outputs.commits }}
           generate_release_notes: true
           prerelease: ${{ steps.prerelease_flag.outputs.prerelease }}
