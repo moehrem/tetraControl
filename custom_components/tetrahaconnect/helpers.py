@@ -35,19 +35,33 @@ class TetrahaconnectHelpers:
 
     def update_entities(
         self,
-        tetra_variables: dict[str, str],
+        data_dict: dict[str, str],
     ) -> None:
-        """Create a message based on the current SDS variables.
+        """Create a message based on the given dictionary.
 
-        The returned dictionary uses the first key from the message as its key,
-        and the rest of the message as its value.
+        The first key will be the key of the message, and the rest will be the content. Finally
+        a HA entity will be created or updated with the message. The first key will be used as the entity ID.
+
+        Args:
+            data_dict (dict[str, str]): Dictionary containing variables to compose to a HA entity message.
+
+        Raises:
+            TypeError: If data_dict is not a dictionary.
+            ValueError: If data_dict is empty or does not contain valid keys.
+
         """
-        tetra_variables["sds_content"] = ""
+        if not isinstance(data_dict, dict):
+            _LOGGER.error("Data must be a dictionary, got %s", type(data_dict))
+            raise TypeError("Data must be a dictionary")
+
+        if not data_dict:
+            _LOGGER.error("Data dictionary is empty")
+            raise ValueError("Data dictionary cannot be empty")
 
         try:
             # Only include keys with non-empty, non-None, non-zero values
             message: dict[str, str] = {
-                k: v for k, v in tetra_variables.items() if v not in ("", 0, None)
+                k: v for k, v in data_dict.items() if v not in ("", 0, None)
             }
 
             if next(iter(message), None) != "sds_command":

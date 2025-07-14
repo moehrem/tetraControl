@@ -397,6 +397,9 @@ class Motorola:
                         self._motorola_variables["sds_content"],
                     )
 
+            # delete sds_content to avoid data confusion
+            self._motorola_variables["sds_content"] = ""
+
     def _process_invalid_message(self, raw_message):
         """Prepare invalid messages for sensor handling."""
 

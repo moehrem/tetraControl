@@ -17,6 +17,7 @@ PLATFORMS = [Platform.SENSOR]
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up tetraHAconnect from a config entry."""
     coordinator = TetrahaconnectCoordinator(hass, config_entry)
+    # await coordinator.async_config_entry_first_refresh()
     await coordinator.async_start()
     hass.data[DOMAIN] = coordinator
     await hass.config_entries.async_forward_entry_setups(config_entry, PLATFORMS)
