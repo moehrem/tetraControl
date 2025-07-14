@@ -1,3 +1,5 @@
 {
-    "name": "tetraHAconnect"
-  }
+  "name": "tetraHAconnect",
+  "description": "Home Assistant integration for TETRA radios via serial interface.",
+  "category": "integration"
+}
