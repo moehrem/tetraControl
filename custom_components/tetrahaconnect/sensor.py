@@ -1,4 +1,4 @@
-"""Sensor setup for TetraControl integration."""
+"""Sensor setup for tetraHAconnect integration."""
 
 import logging
 
@@ -41,7 +41,7 @@ async def async_setup_entry(
     config_entry: ConfigEntry,
     async_add_entities: Callable[[list[Any]], None],
 ) -> None:
-    """Set up TetraControl sensors based on a config entry."""
+    """Set up tetraHAconnect sensors based on a config entry."""
     coordinator = hass.data[DOMAIN]
     entities = {}
 

@@ -1,4 +1,4 @@
-"""Config flow to configure the tetraControl."""
+"""Config flow to configure the tetraHAconnect integration."""
 
 import asyncio
 from dataclasses import dataclass
@@ -19,7 +19,7 @@ from .const import DOMAIN, MANUFACTURERS_LIST, VERSION, MINOR_VERSION, PATCH_VER
 
 
 @dataclass
-class tetraControlConfigEntry:
+class TetrahaconnectConfigEntry:
     """Data class to hold device information."""
 
     manufacturer: str = "unknown"
@@ -30,8 +30,8 @@ class tetraControlConfigEntry:
     revision: str = "unknown"
 
 
-class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for tetraControl."""
+class TetrahaconnectConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Tetrahaconnect."""
 
     VERSION = VERSION
     MINOR_VERSION = MINOR_VERSION
@@ -39,7 +39,7 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize the config flow."""
-        self.config_entry = tetraControlConfigEntry()
+        self.config_entry = TetrahaconnectConfigEntry()
         self.errors: dict[str, str] = {}
 
     async def async_step_user(
@@ -124,7 +124,7 @@ class tetraControlConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return sorted(set(usable_devices))
 
-    async def _request_device_data(self, config_entry: tetraControlConfigEntry):
+    async def _request_device_data(self, config_entry: TetrahaconnectConfigEntry):
         """Request serial port and request device data."""
         device_commands = ["ATZ\r\n", "AT+GMI?\r\n", "AT+GMM?\r\n", "AT+GMR?\r\n"]
 
