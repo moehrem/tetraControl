@@ -128,17 +128,20 @@ class TetrahaconnectConfigFlow(ConfigFlow, domain=DOMAIN):
         return sorted(set(usable_devices))
 
     async def _request_device_data(self, config_entry: TetrahaconnectConfigEntry):
-        """Request serial port and request device data."""
+        """Request serial port and request device data.
+
+        Request manufacturer, model and revision identification from the device.
+        Wait for an answer for each command.
+        This will not create any entities, its just for device setup.
+
+        Service commands will be initialized in com_manager.
+
+        """
         device_commands = [
             "ATZ\r\n",
             "AT+GMI?\r\n",
             "AT+GMM?\r\n",
             "AT+GMR?\r\n",
-            "AT+CTSP=2,0\r\n",
-            "AT+CTSP=2,1\r\n",
-            "AT+CTSP=2,2\r\n",
-            "AT+CTSP=2,3\r\n",
-            "AT+CTSP=2,4\r\n",
         ]
 
         try:

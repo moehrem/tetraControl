@@ -68,6 +68,7 @@ class COMManager:
             self.com_port,
             baudrate=self.baudrate,
         )
+        self.helpers.update_connection_status(1)
         _LOGGER.info("Serial connection established on %s", self.com_port)
         # await self._tetra_initialize()
 
@@ -96,7 +97,6 @@ class COMManager:
             try:
                 await self._connect()
                 if self.transport and not self.transport.is_closing():
-                    self.helpers.update_connection_status(1)
                     break
             except (serial.SerialException, OSError, ValueError) as e:
                 _LOGGER.warning("Connection attempt %d failed: %s", attempt, e)
@@ -109,7 +109,6 @@ class COMManager:
             try:
                 await self._connect()
                 if self.transport and not self.transport.is_closing():
-                    self.helpers.update_connection_status(1)
                     return
             except (serial.SerialException, OSError, ValueError) as e:
                 _LOGGER.warning("Connection attempt %d failed: %s", attempt, e)
@@ -122,8 +121,19 @@ class COMManager:
         )
 
     async def tetra_initialize(self):
-        """Initialize TETRA device for specific CTSP-Services."""
+        """Initialize TETRA device for specific CTSP-Services.
+
+        Initialize the device for TETRA services by sending standard AT commands.
+        Wait for the answer on each command and log an error if the command fails.
+        This will not create any entities, its just for device initialization.
+
+        Device information like model, sw-version, revision, manufacturer were
+        already requested in the config flow, so we do not request them again here.
+
+        """
         # these commands are standard TETRA commands, which every device should respond to
+
+        _LOGGER.info("##### Initializing TETRA services on %s #####", self.com_port)
 
         if not self.transport:
             for _ in range(5):
@@ -136,31 +146,22 @@ class COMManager:
                 )
                 return
 
-        _LOGGER.info("Initializing TETRA device on %s", self.com_port)
-
         raw_data = {}
-
-        device_commands = [
-            "ATZ\r\n",
-            "AT+GMI?\r\n",
-            "AT+GMM?\r\n",
-            "AT+GMR?\r\n",
-        ]
 
         # +CTSP=<service profile>, <service layer1>, [<service layer2>], [<AI mode>], [<link identifier>]
         service_commands = [
             # "AT+CTSP=1,2,20\r\n",  # Status TE
-            # "AT+CTSP=2,2,20\r\n",  # Status MT & TE
-            # "AT+CTSP=1,3,130\r\n",  # Textnachrichten einschalten
-            # "AT+CTSP=1,3,131\r\n",  # GPS einschalten
-            # "AT+CTSP=1,3,10\r\n",  # Status GPS
-            # "AT+CTSP=1,3,137\r\n",  # Immediate Text
-            # "AT+CTSP=1,3,138\r\n",  # Alarm
-            "AT+CTSP=2,0\r\n",
-            "AT+CTSP=2,1\r\n",
-            "AT+CTSP=2,2\r\n",
-            "AT+CTSP=2,3\r\n",
-            "AT+CTSP=2,4\r\n",
+            "AT+CTSP=2,2,20\r\n",  # Status MT & TE
+            "AT+CTSP=1,3,130\r\n",  # Textnachrichten einschalten
+            "AT+CTSP=1,3,131\r\n",  # GPS einschalten
+            "AT+CTSP=1,3,10\r\n",  # Status GPS
+            "AT+CTSP=1,3,137\r\n",  # Immediate Text
+            "AT+CTSP=1,3,138\r\n",  # Alarm
+            # "AT+CTSP=2,0\r\n",
+            # "AT+CTSP=2,1\r\n",
+            # "AT+CTSP=2,2\r\n",
+            # "AT+CTSP=2,3\r\n",
+            # "AT+CTSP=2,4\r\n",
         ]
 
         for cmd in service_commands:
@@ -171,61 +172,67 @@ class COMManager:
                     asyncio.get_running_loop().create_future()
                 )
                 self.transport.write(cmd.encode())
-                response = await self.protocol.response_future
-                self.protocol.expect_response = False
-                raw_data[cmd] = response
+                try:
+                    response = await asyncio.wait_for(
+                        self.protocol.response_future, timeout=5
+                    )
+                    self.protocol.expect_response = False
+                    raw_data[cmd] = response
+                except asyncio.TimeoutError:
+                    _LOGGER.error(
+                        "Timeout while waiting for response to command: %s", cmd.strip()
+                    )
+                    raw_data[cmd] = b"CME ERROR: response timeout"
             else:
                 _LOGGER.warning(
                     "Service profile not initialized, cannot send command: %s",
                     cmd.strip(),
                 )
 
-        # parse service commands
-        self._parse_tetra_service_commands(raw_data)
-
-        # send device commands, but do not wait for an answer anymore, as the device will not respond to these commands
-        for cmd in device_commands:
-            _LOGGER.debug("Sending initializing command: %s", cmd.strip())
-            if self.protocol is not None:
-                self.protocol.expect_response = False
-                self.transport.write(cmd.encode())
-
-            else:
+        # check responses
+        for cmd, resp in raw_data.items():
+            if resp != b"\r\nOK\r\n":
                 _LOGGER.warning(
-                    "Serial device not initialized, cannot send command: %s",
-                    cmd.strip(),
+                    "Service profile command '%s' failed with response: %s",
+                    cmd.strip().replace("\r\n", ""),
+                    resp.decode("utf-8").strip().replace("\r\n", ""),
                 )
 
-        _LOGGER.info("TETRA device initialized successfully on %s", self.com_port)
+        # parse service commands
+        # self._parse_tetra_service_commands(raw_data)
 
-    def _parse_tetra_service_commands(self, raw_data) -> None:
-        """Parse the initial response to extract manufacturer, device ID, and revision."""
+        _LOGGER.info(
+            "##### TETRA services initialized successfully on %s #####", self.com_port
+        )
 
-        for cmd, resp in raw_data.items():
-            # init defaults
-            for key, default in TETRA_DEFAULTS.items():
-                self._tetra_defaults[key] = default
-            parsed_data = {}
+    # def _parse_tetra_service_commands(self, raw_data) -> None:
+    #     """Parse the initial response to extract manufacturer, device ID, and revision."""
 
-            self._tetra_defaults["tetra_command"] = (
-                cmd.strip().replace("\r\n", "").replace("AT+", "").split("=")[0]
-            )
-            self._tetra_defaults["tetra_message"] = (
-                cmd.strip().replace("\r\n", "").split("=")[1] if "=" in cmd else ""
-            )
-            resp = resp.decode("utf-8").strip()
-            parsed_data = {
-                self._tetra_defaults["tetra_command"]: self._tetra_defaults[
-                    "tetra_message"
-                ],
-                "Status": resp,
-            }
-            self.helpers.update_entities(parsed_data)
-            _LOGGER.debug(
-                "Parsed TETRA command: %s with response: %s",
-                self._tetra_defaults["tetra_command"],
-                resp,
-            )
+    #     for cmd, resp in raw_data.items():
+    #         # init defaults
+    #         for key, default in TETRA_DEFAULTS.items():
+    #             self._tetra_defaults[key] = default
+    #         parsed_data = {}
+
+    #         self._tetra_defaults["tetra_command"] = (
+    #             cmd.strip().replace("\r\n", "").replace("AT+", "").split("=")[0]
+    #         )
+    #         self._tetra_defaults["tetra_message"] = (
+    #             cmd.strip().replace("\r\n", "").split("=")[1] if "=" in cmd else ""
+    #         )
+    #         resp = resp.decode("utf-8").strip()
+    #         parsed_data = {
+    #             self._tetra_defaults["tetra_command"]: self._tetra_defaults[
+    #                 "tetra_message"
+    #             ],
+    #             "Status": resp,
+    #         }
+    #         self.helpers.update_entities(parsed_data)
+    #         _LOGGER.debug(
+    #             "Parsed TETRA command: %s with response: %s",
+    #             self._tetra_defaults["tetra_command"],
+    #             resp,
+    #         )
 
 
 class SerialHandler(asyncio.Protocol):
@@ -245,7 +252,6 @@ class SerialHandler(asyncio.Protocol):
         """Handle the connection being made."""
         self.transport = transport
         _LOGGER.debug("Serial connection opened")
-        self.helpers.update_connection_status(1)
 
     def data_received(self, data):
         """Handle incoming data."""

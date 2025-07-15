@@ -1,52 +1,55 @@
 import serial
+import threading
 import time
 
-port = "/dev/pts/6"
+# config
+SERIAL_PORT = "/dev/pts/6"
+BAUDRATE = 38400
+TIMEOUT = 0.5
 
-strings = [
-    "\r\nOK\r\n",
-    "\r\n+GMI: MOTOROLA\r\n",
-    "\r\n+GMM: 54009,test_M83AAA1BB2CC,91.2.0.0\r\n",
-    "\r\n+GMR: R11.222.3333\r\n",
-    "\r\nOK\r\n",
-    "\r\nOK\r\n",
-    "\r\nOK\r\n",
-    "\r\nOK\r\n",
-    "\r\nOK\r\n",
-    # "\r\n+CTSDSR: 13,1234657,0,9876543,0,16\r\n8004\r\n",
-    # "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-68GW-L2   01\r\n",
-    # "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-43LF8/6   01\r\n",
-    # "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-43LF8/6   01\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n+CTSDSR: 13,1234567,0,9876543,0,16\r\n8003\r\n",
-    # "\r\n+CTSDSR: 13,1234567,0,9876543,0,16\r\n8004\r\n",
-    # "\r\n+CTSDSR: 13,1234657,0,9876543,0,16\r\n8003\r\n",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,168\r\n0A4DD400000000000000005FE00023085",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,168\r\n0A4DD400000000000000005FE00023085",
-    # "\r\n\r\n\r\n+CTSDSR: 13,1234657,0,9876543,0,16\r\n8004\r\n",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,168\r\n0A4DD400000000000000005FE00023085",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264B2654EB2000810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264C2654EAA020810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264DA654EA2020810\r\n",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264EA654E92020810\r\n",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264EA654E92040810\r\n",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264FA654E91020810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FF",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
-    # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+messages = [
+    # "\r\n+GMI: MOTOROLA\r\n\r\nOK\r\n\r\n+GMM",
+    # ": 54009,M83PFT6TZ6AG,91.2.0.0\r\n\r\nOK\r\n\r\n+GMR: R27.220.9063\r\n\r\nOK\r\n",
+    # "\r\nOK\r\n",
+    # "\r\nOK\r\n",
+    # "\r\nOK\r\n",
+    # "\r\nOK\r\n",
+    # "\r\nOK\r\n",
+    # "\r\nOK\r\n",
+    "\r\n+CTSDSR: 13,1234657,0,9876543,0,16\r\n8004\r\n",
+    "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-68GW-L2   01\r\n",
+    "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-43LF8/6   01\r\n",
+    "\r\n\r\n\r\n+ENCR: 15,SHFW SE 30-43LF8/6   01\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n+CTSDSR: 13,1234567,0,9876543,0,16\r\n8003\r\n",
+    "\r\n+CTSDSR: 13,1234567,0,9876543,0,16\r\n8004\r\n",
+    "\r\n+CTSDSR: 13,1234657,0,9876543,0,16\r\n8003\r\n",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,168\r\n0A4DD400000000000000005FE00023085",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,168\r\n0A4DD400000000000000005FE00023085",
+    "\r\n\r\n\r\n+CTSDSR: 13,1234657,0,9876543,0,16\r\n8004\r\n",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,168\r\n0A4DD400000000000000005FE00023085",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264B2654EB2000810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264C2654EAA020810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264DA654EA2020810\r\n",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264EA654E92020810\r\n",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264EA654E92040810\r\n",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n+CTSDSR: 12,1234567,0,9876543,0,88\r\n0A007264FA654E91020810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FF",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n\r\n\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
+    "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
     # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
     # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
     # "\r\n+CTSDSR: 12,1234657,0,9876543,0,88\r\n0A30000000000007FFE810\r\n",
@@ -767,9 +770,63 @@ strings = [
     # "\r\n+CME ERROR: 3\r\n",
 ]
 
-for string in strings:
-    ser = serial.Serial(port, 9600, timeout=1)
-    time.sleep(0.2)  # kurz warten, bis Verbindung steht
-    ser.write(string.encode("utf-8"))
-    time.sleep(0.2)
-    ser.close()
+
+# Frage-Antwort-Mapping (beliebig erweiterbar)
+qa_map = {
+    b"ATZ\r\n": b"\r\nOK\r\n",
+    b"AT+GMI?\r\n": b"\r\n+GMI: Motorola\r\n",
+    b"AT+GMM?\r\n": b"\r\n+GMM: 54009,M83AAA1BB2CC,91.2.0.0\r\n",
+    b"AT+GMR?\r\n": b"\r\n+GMR: R11.222.3333\r\n",
+    b"AT+CTSP=2,0\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=2,1\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=2,2\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=2,3\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=2,4\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=1,2,20\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=2,2,20\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=1,3,130\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=1,3,131\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=1,3,10\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=1,3,137\r\n": b"\r\nOK\r\n",
+    b"AT+CTSP=1,3,138\r\n": b"\r\nOK\r\n",
+    # Weitere Paare nach Bedarf
+}
+
+stop_flag = False
+
+
+def wait_for_enter():
+    input("Drücke Enter zum Abbrechen...\n")
+    global stop_flag
+    stop_flag = True
+
+
+threading.Thread(target=wait_for_enter, daemon=True).start()
+
+start = time.time()
+with serial.Serial(SERIAL_PORT, BAUDRATE, timeout=TIMEOUT) as ser:
+    print(
+        f"Listening on {SERIAL_PORT} ... (Ctrl+C to exit and 'Enter' to stop listening and start sending)"
+    )
+    try:
+        while not stop_flag:
+            data = ser.readline()
+            if data:
+                print(f"Received: {data!r}")
+                response = qa_map.get(
+                    data, b"CME ERROR: 3\r\n"
+                )  # Standardantwort bei unbekannter Anfrage
+                ser.write(response)
+                print(f"Sent: {response!r}")
+
+        print("Stopped listening. Starting to send messages...")
+
+        for message in messages:
+            time.sleep(TIMEOUT)
+            ser.write(message.encode())
+            print(f"Sent message: {message.strip()!r}")
+
+        print("All messages sent successfully.")
+
+    except KeyboardInterrupt:
+        print("Abbruch durch Benutzer.")
