@@ -118,7 +118,6 @@ class Mappings:
             "+GMI": "Manufacturer Identification",
             "+GMR": "Revision Identification",
             "+CMEE": "Error Report",
-            "+CMEERROR": "Error Report",
             "+CME ERROR": "Error Report",
             "+ENCR": "Encryption Status",
         }
