@@ -39,14 +39,14 @@ jobs:
       - name: Commit changes
         run: |
           git add .
-          git commit -m ${{ github.event.head_commit.headline }} || echo "No changes to commit"
+          git commit -m "${{ github.event.head_commit.headline || 'Deploy from dev branch' }}" || echo "No changes to commit"
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GH_TOKEN }}
           commit-message: "Deploy from dev branch"
-          title: ${{ github.event.head_commit.headline }}
+          title: ${{ github.event.head_commit.headline || 'Deploy from dev branch' }}
           body: ${{ github.event.head_commit.message }}
           base: main
           branch: deploy-to-main-auto
