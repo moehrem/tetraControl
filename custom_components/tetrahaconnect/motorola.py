@@ -53,6 +53,11 @@ class Motorola:
         try:
             self._decoded_data = raw_data.decode("utf-8", errors="ignore")
             _LOGGER.debug("Decoded raw data: %s", self._decoded_data)
+
+            # if decoded data does not end with \r\n, it is not a complete message - wait for the rest
+            if not self._decoded_data.endswith("\r\n"):
+                return raw_data
+
         except UnicodeDecodeError as e:
             _LOGGER.error("Failed to decode raw data: %s, thus ignoring data", e)
             return self.raw_returns
@@ -62,7 +67,7 @@ class Motorola:
             _LOGGER.debug("##### Start parsing decoded data #####")
             try:
                 self._parse_decoded_data()
-                self._organize_messages()
+                # self._organize_messages()
                 self._check_user_data_length()
                 _LOGGER.debug("##### End parsing decoded data #####")
             except (
@@ -95,7 +100,7 @@ class Motorola:
             _LOGGER.debug("##### Start processing incomplete messages #####")
             for msg in self._incomplete_messages:
                 try:
-                    self.raw_returns += msg.encode("utf-8") + b"\r\n"
+                    self.raw_returns += msg.encode("utf-8")
                     _LOGGER.debug("Added incomplete message to raw returns: %s", msg)
                     _LOGGER.debug("##### End processing incomplete messages #####")
 
@@ -125,22 +130,88 @@ class Motorola:
         self._buffer = []
 
         # split decoded data into lines
-        self._buffer = [
-            line.strip() for line in self._decoded_data.split("\r\n") if line.strip()
-        ]
+        self._buffer = self._decoded_data.split("\r\n")
+
+        # self._buffer = re.findall(r"(\r\n.*?\r\n)", self._decoded_data)
+        # rest = self._decoded_data.rsplit("\r\n", 1)[-1]
+        # if rest and not rest.endswith("\r\n"):
+        #     self._buffer.append("\r\n" + rest)
 
         # clean up messages
         for i, line in enumerate(self._buffer):
             line = line.strip()
             line = line.replace("\r", "").replace("\n", "")
             line = line.replace(":", ",")
-            # line = line.replace(" ", "")
+            line = line.replace(" ", "")
             # line = re.sub(r",+", ",", line)
             line = line.replace(", ", ",")
             self._buffer[i] = line
 
-        # remove empty lines and 'OK' messages
-        self._buffer = [line for line in self._buffer if line and line != "OK"]
+        # remove empty lines, 'OK', carriage returns and newlines
+        self._buffer = [
+            line
+            for line in self._buffer
+            if line and line != "OK" and not re.fullmatch(r"[\r\n]+", line)
+        ]
+
+        if self._buffer:
+            i = 0
+            while i < len(self._buffer):
+                try:
+                    line = self._buffer[i]
+
+                    # # incomplete message
+                    # if not line.endswith("\r\n"):
+                    #     _LOGGER.debug(
+                    #         "Received incomplete line: %s, treating as incomplete message",
+                    #         line,
+                    #     )
+                    #     self._incomplete_messages.append(line)
+                    #     i += 1
+                    #     continue
+
+                    # # start checking messages
+                    # line = line.strip()
+                    # line = line.replace("\r", "").replace("\n", "")
+
+                    # special case: first line without message header
+                    if i == 0 and not line.startswith("+"):
+                        _LOGGER.debug(
+                            "Received first line without message header: %s, treating as incomplete message",
+                            line,
+                        )
+                        self._incomplete_messages.append(line)
+                        i += 1
+
+                    # new message - check if single or multiline message
+                    elif line.startswith("+"):
+                        # add all following lines that does not start with '+' to the current message
+                        combined_line = line
+                        j = i + 1
+                        while j < len(self._buffer) and not self._buffer[j].startswith(
+                            "+"
+                        ):
+                            combined_line += "," + self._buffer[j]
+                            j += 1
+                        self._complete_messages.append(combined_line)
+                        _LOGGER.debug("Received multi-line message: %s", combined_line)
+                        i = j
+
+                    # incomplete message
+                    else:
+                        self._incomplete_messages.append(line)
+                        i += 1
+                        _LOGGER.debug(
+                            "Received user data without message header: %s, treating as incomplete message",
+                            line,
+                        )
+
+                except IndexError as err:
+                    _LOGGER.error(
+                        "Error while separating messages: %s, error: %s",
+                        self._buffer,
+                        err,
+                    )
 
     def _organize_messages(self):
         i = 0
