@@ -1,13 +1,13 @@
 {
-  "domain": "tetrahaconnect",
-  "name": "tetraHAconnect",
+  "domain": "tetraconnect",
+  "name": "tetraconnect",
   "codeowners": ["@moehrem"],
   "config_flow": true,
   "dependencies": [],
-  "documentation": "https://github.com/moehrem/tetraHAconnect",
+  "documentation": "https://github.com/moehrem/tetraconnect",
   "integration_type": "device",
   "iot_class": "local_polling",
-  "issue_tracker": "https://github.com/moehrem/tetraHAconnect/issues",
+  "issue_tracker": "https://github.com/moehrem/tetraconnect/issues",
   "requirements": ["pyserial-asyncio"],
   "version": "0.3.1"
 }

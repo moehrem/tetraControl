@@ -1,4 +1,4 @@
-"""tetraHAconnect integration for Home Assistant."""
+"""tetraconnect integration for Home Assistant."""
 
 # import logging
 
@@ -7,7 +7,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.const import Platform
 
 from .const import DOMAIN
-from .coordinator import TetrahaconnectCoordinator
+from .coordinator import TetraconnectCoordinator
 
 # _LOGGER = logging.getLogger(__name__)
 
@@ -15,8 +15,8 @@ PLATFORMS = [Platform.SENSOR]
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
-    """Set up tetraHAconnect from a config entry."""
-    coordinator = TetrahaconnectCoordinator(hass, config_entry)
+    """Set up tetraconnect from a config entry."""
+    coordinator = TetraconnectCoordinator(hass, config_entry)
     # await coordinator.async_config_entry_first_refresh()
     await coordinator.async_start()
     hass.data[DOMAIN] = coordinator
@@ -27,7 +27,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    coordinator: TetrahaconnectCoordinator = hass.data[DOMAIN]
+    coordinator: TetraconnectCoordinator = hass.data[DOMAIN]
     await coordinator.async_stop()
     await hass.config_entries.async_unload_platforms(config_entry, PLATFORMS)
 

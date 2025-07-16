@@ -4,7 +4,7 @@ import logging
 import re
 
 from .const import MOTOROLA_VARIABLES_DEFAULTS, MOTOROLA_COMMANDS
-from .helpers import TetrahaconnectHelpers
+from .helpers import TetraconnectHelpers
 from .tetra_mappings import Mappings
 
 _LOGGER = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ class Motorola:
         self._motorola_variables: dict = MOTOROLA_VARIABLES_DEFAULTS.copy()
 
         self.mappings = Mappings()
-        self.helpers = TetrahaconnectHelpers(coordinator)
+        self.helpers = TetraconnectHelpers(coordinator)
 
     def data_handler(self, raw_data) -> bytes:
         """Handle incoming serial data from Motorola devices.
@@ -372,7 +372,7 @@ class Motorola:
                 case _:
                     self._motorola_variables["unknown_command_message"] = raw_message
                     _LOGGER.warning(
-                        "Received SDS command: %s, message %s. No handling implemented yet, please report this to the developer via https://github.com/moehrem/tetraHAconnect/issues",
+                        "Received SDS command: %s, message %s. No handling implemented yet, please report this to the developer via https://github.com/moehrem/tetraconnectssues",
                         self._motorola_variables["sds_command"],
                         message,
                     )
