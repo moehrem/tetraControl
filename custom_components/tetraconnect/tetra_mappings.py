@@ -1,4 +1,4 @@
-"""Contain all mapping methods and mapping data for TETRA message handling in tetraHAconnect integration."""
+"""Contain all mapping methods and mapping data for TETRA message handling in tetraconnect integration."""
 
 
 class Mappings:

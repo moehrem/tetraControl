@@ -1,4 +1,4 @@
-# custom_components/tetraHAconnect/com_manager.py
+# custom_components/tetraconnectom_manager.py
 
 import asyncio
 import contextlib
@@ -13,7 +13,7 @@ from .const import (
     SLEEP_TIME_RETRY,
     TETRA_DEFAULTS,
 )
-from .helpers import TetrahaconnectHelpers
+from .helpers import TetraconnectHelpers
 from .motorola import Motorola
 
 _LOGGER = logging.getLogger(__name__)
@@ -32,7 +32,7 @@ class COMManager:
         self._tetra_defaults = TETRA_DEFAULTS.copy()
         self._connection_check_task = None
 
-        self.helpers = TetrahaconnectHelpers(coordinator)
+        self.helpers = TetraconnectHelpers(coordinator)
 
     async def serial_initialize(self, hass):
         """Start monitoring and connection loop."""
@@ -244,7 +244,7 @@ class SerialHandler(asyncio.Protocol):
         self.raw_data = b""
 
         self.motorola = Motorola(coordinator)
-        self.helpers = TetrahaconnectHelpers(coordinator)
+        self.helpers = TetraconnectHelpers(coordinator)
         self.expect_response = False
         self.response_future = None
 

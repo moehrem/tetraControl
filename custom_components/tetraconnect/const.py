@@ -1,7 +1,7 @@
-"""Constants for the tetraHAconnect integration."""
+"""Constants for the tetraconnect integration."""
 
 # general constants
-DOMAIN = "tetrahaconnect"
+DOMAIN = "tetraconnect"
 VERSION = "0"
 MINOR_VERSION = "3"
 PATCH_VERSION = "1"
