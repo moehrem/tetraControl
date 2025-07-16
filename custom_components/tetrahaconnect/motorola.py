@@ -3,7 +3,7 @@
 import logging
 import re
 
-from .const import MOTOROLA_VARIABLES_DEFAULTS
+from .const import MOTOROLA_VARIABLES_DEFAULTS, MOTOROLA_COMMANDS
 from .helpers import TetrahaconnectHelpers
 from .tetra_mappings import Mappings
 
@@ -67,7 +67,6 @@ class Motorola:
             _LOGGER.debug("##### Start parsing decoded data #####")
             try:
                 self._parse_decoded_data()
-                # self._organize_messages()
                 self._check_user_data_length()
                 _LOGGER.debug("##### End parsing decoded data #####")
             except (
@@ -77,7 +76,7 @@ class Motorola:
                 UnicodeEncodeError,
                 re.error,
             ) as err:
-                _LOGGER.error("Error parsing decoded data: %s", err)
+                _LOGGER.error("##### Error parsing decoded data: %s #####", err)
                 _LOGGER.debug("##### Aborted parsing and data handling #####")
                 return self.raw_returns
 
@@ -92,7 +91,9 @@ class Motorola:
                     _LOGGER.debug("##### End processing complete messages #####")
 
                 except (AttributeError, TypeError, IndexError) as err:
-                    _LOGGER.error("Error processing complete messages: %s", err)
+                    _LOGGER.error(
+                        "##### Error processing complete messages: %s #####", err
+                    )
                     continue
 
         # handle incomplete messages
@@ -105,7 +106,9 @@ class Motorola:
                     _LOGGER.debug("##### End processing incomplete messages #####")
 
                 except (AttributeError, TypeError, IndexError) as err:
-                    _LOGGER.error("Error processing incomplete messages: %s", err)
+                    _LOGGER.error(
+                        "##### Error processing incomplete messages: %s #####", err
+                    )
                     continue
 
         # handle invalid messages
@@ -118,7 +121,9 @@ class Motorola:
                     _LOGGER.debug("##### End processing invalid messages #####")
 
                 except (AttributeError, TypeError, IndexError) as err:
-                    _LOGGER.error("Error processing invalid messages: %s", err)
+                    _LOGGER.error(
+                        "##### Error processing invalid messages: %s #####", err
+                    )
                     continue
 
         return self.raw_returns
@@ -126,25 +131,26 @@ class Motorola:
     def _parse_decoded_data(self):
         """Parse the decoded data into complete and incomplete messages."""
 
-        # reinit buffer to avoid multiplcation of data
+        _LOGGER.debug("Decoded data: %s", self._decoded_data)
+
+        # reinit buffer to avoid multiplication of data
         self._buffer = []
 
         # split decoded data into lines
         self._buffer = self._decoded_data.split("\r\n")
 
-        # self._buffer = re.findall(r"(\r\n.*?\r\n)", self._decoded_data)
-        # rest = self._decoded_data.rsplit("\r\n", 1)[-1]
-        # if rest and not rest.endswith("\r\n"):
-        #     self._buffer.append("\r\n" + rest)
+        # split messages by +
+        split_buffer = []
+        for line in self._buffer:
+            split_buffer.extend(re.split(r"(?=\+)", line))
+        self._buffer = split_buffer
 
         # clean up messages
         for i, line in enumerate(self._buffer):
-            line = line.strip()
-            line = line.replace("\r", "").replace("\n", "")
+            line = line.replace("\r\nOK\r\n", "")
             line = line.replace(":", ",")
             line = line.replace(" ", "")
-            # line = re.sub(r",+", ",", line)
-            line = line.replace(", ", ",")
+            line = line.replace("\r", "").replace("\n", "")
             self._buffer[i] = line
 
         # remove empty lines, 'OK', carriage returns and newlines
@@ -154,105 +160,71 @@ class Motorola:
             if line and line != "OK" and not re.fullmatch(r"[\r\n]+", line)
         ]
 
-        if self._buffer:
-            i = 0
-            while i < len(self._buffer):
-                try:
-                    line = self._buffer[i]
+        if not self._buffer:
+            _LOGGER.debug("No valid data found in buffer, abort parsing raw data")
+            return
 
-                    # # incomplete message
-                    # if not line.endswith("\r\n"):
-                    #     _LOGGER.debug(
-                    #         "Received incomplete line: %s, treating as incomplete message",
-                    #         line,
-                    #     )
-                    #     self._incomplete_messages.append(line)
-                    #     i += 1
-                    #     continue
-
-                    # # start checking messages
-                    # line = line.strip()
-                    # line = line.replace("\r", "").replace("\n", "")
-
-                    # special case: first line without message header
-                    if i == 0 and not line.startswith("+"):
-                        _LOGGER.debug(
-                            "Received first line without message header: %s, treating as incomplete message",
-                            line,
-                        )
-                        self._incomplete_messages.append(line)
-                        i += 1
-
-                    # new message - check if single or multiline message
-                    elif line.startswith("+"):
-                        # add all following lines that does not start with '+' to the current message
-                        combined_line = line
-                        j = i + 1
-                        while j < len(self._buffer) and not self._buffer[j].startswith(
-                            "+"
-                        ):
-                            combined_line += "," + self._buffer[j]
-                            j += 1
-                        self._complete_messages.append(combined_line)
-                        _LOGGER.debug("Received multi-line message: %s", combined_line)
-                        i = j
-
-                    # incomplete message
-                    else:
-                        self._incomplete_messages.append(line)
-                        i += 1
-                        _LOGGER.debug(
-                            "Received user data without message header: %s, treating as incomplete message",
-                            line,
-                        )
-
-                except IndexError as err:
-                    _LOGGER.error(
-                        "Error while separating messages: %s, error: %s",
-                        self._buffer,
-                        err,
-                    )
-
-    def _organize_messages(self):
         i = 0
         while i < len(self._buffer):
-            try:
-                line = self._buffer[i]
-                # special case: first line without message header
-                if i == 0 and not line.startswith("+"):
-                    self._incomplete_messages.append(line)
+            line = self._buffer[i]
+
+            # case: line not starting with '+' indicating an invalid message (we may never receive another header BEFORE this line)
+            if not line.startswith("+"):
+                if i == 0:
                     _LOGGER.debug(
-                        "Received first line without message header: %s, treating as incomplete message",
+                        "Received first line without message header: %s, treating as invalid message",
                         line,
                     )
-                    i += 1
+                else:
+                    _LOGGER.debug(
+                        "Received user data without message header: %s, treating as invalid message",
+                        line,
+                    )
+                self._invalid_messages.append(line)
+                i += 1
+                continue
 
-                # new message - check if single or multiline message
-                elif line.startswith("+"):
-                    # add all following lines that does not start with '+' to the current message
-                    combined_line = line
-                    j = i + 1
+            # case: line starts with '+' indicating a new message
+
+            # check for command
+            command_key = line.split(",")[0]
+            command_value = MOTOROLA_COMMANDS.get(command_key)
+
+            # handle multi-line messages
+            if command_value == "multi":
+                combined_line = line
+                j = i + 1
+                # Prüfe, ob es eine weitere Zeile gibt
+                if j < len(self._buffer) and not self._buffer[j].startswith("+"):
                     while j < len(self._buffer) and not self._buffer[j].startswith("+"):
                         combined_line += "," + self._buffer[j]
                         j += 1
                     self._complete_messages.append(combined_line)
                     _LOGGER.debug("Received multi-line message: %s", combined_line)
-                    i = j
-
-                # incomplete message
                 else:
                     self._incomplete_messages.append(line)
-                    i += 1
                     _LOGGER.debug(
-                        "Received user data without message header: %s, treating as incomplete message",
+                        "Multi-line message incomplete, added to incomplete_messages: %s",
                         line,
                     )
-            except IndexError as err:
-                _LOGGER.error(
-                    "Error while separating messages: %s, error: %s",
-                    self._buffer,
-                    err,
+                i = j
+                continue
+
+            # handle single-line messages
+            elif command_value == "single":
+                self._complete_messages.append(line)
+                _LOGGER.debug("Received single-line message: %s", line)
+                i += 1
+                continue
+
+            # handle unknown commands
+            else:
+                _LOGGER.debug(
+                    "Unknown command with unknown number of lines %s, treating as complete message",
+                    command_key,
                 )
+                self._complete_messages.append(line)
+                i += 1
 
     def _check_user_data_length(self):
         """Check the user data length in complete messages.

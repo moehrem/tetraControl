@@ -282,6 +282,7 @@ class SerialHandler(asyncio.Protocol):
 
                 # put remaining data back into raw_data
                 self.raw_data = remaining
+                _LOGGER.debug("Remaining data after processing: %s", remaining)
 
                 # TODO
                 # add MQTT publish here and check if mqtt publishing or entity creation is needed
