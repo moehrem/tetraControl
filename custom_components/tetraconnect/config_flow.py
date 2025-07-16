@@ -1,4 +1,4 @@
-"""Config flow to configure the tetraHAconnect integration."""
+"""Config flow to configure the tetraconnect integration."""
 
 import asyncio
 from dataclasses import dataclass
@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
-class TetrahaconnectConfigEntry:
+class TetraconnectConfigEntry:
     """Data class to hold device information."""
 
     manufacturer: str = "unknown"
@@ -33,8 +33,8 @@ class TetrahaconnectConfigEntry:
     revision: str = "unknown"
 
 
-class TetrahaconnectConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Tetrahaconnect."""
+class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Tetraconnect."""
 
     VERSION = VERSION
     MINOR_VERSION = MINOR_VERSION
@@ -42,7 +42,7 @@ class TetrahaconnectConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize the config flow."""
-        self.config_entry = TetrahaconnectConfigEntry()
+        self.config_entry = TetraconnectConfigEntry()
         self.errors: dict[str, str] = {}
 
     async def async_step_user(
@@ -127,7 +127,7 @@ class TetrahaconnectConfigFlow(ConfigFlow, domain=DOMAIN):
 
         return sorted(set(usable_devices))
 
-    async def _request_device_data(self, config_entry: TetrahaconnectConfigEntry):
+    async def _request_device_data(self, config_entry: TetraconnectConfigEntry):
         """Request serial port and request device data.
 
         Request manufacturer, model and revision identification from the device.

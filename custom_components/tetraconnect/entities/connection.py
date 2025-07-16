@@ -1,4 +1,4 @@
-"""Entity for connection status in tetraHAconnect integration."""
+"""Entity for connection status in tetraconnect integration."""
 
 from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@ from .base import TetraBaseSensor
 
 
 class ConnectionStatusSensor(TetraBaseSensor):
-    """Sensor for connection status in tetraHAconnect integration."""
+    """Sensor for connection status in tetraconnect integration."""
 
     def __init__(self, coordinator, key, data) -> None:
         """Initialize the connection status sensor."""

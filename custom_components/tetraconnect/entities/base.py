@@ -1,14 +1,14 @@
-"""Contain base class for tetraHAconnect sensors."""
+"""Contain base class for tetraconnect sensors."""
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 
 class TetraBaseSensor(CoordinatorEntity, SensorEntity):
-    """Base class for tetraHAconnect sensors."""
+    """Base class for tetraconnect sensors."""
 
     def __init__(self, coordinator, key, data) -> None:
-        """Initialize the tetraHAconnect sensor.
+        """Initialize the tetraconnect sensor.
 
         This class also serves as fallback handler for any messages with unknown tetra-commands. It will not handle messages without command!
 
@@ -25,7 +25,7 @@ class TetraBaseSensor(CoordinatorEntity, SensorEntity):
 
         self._attr_device_info = {
             "identifiers": {
-                ("tetraHAconnect", f"{self._manufacturer}_{self._device_id}")
+                ("tetraconnect", f"{self._manufacturer}_{self._device_id}")
             },
             "name": f"{self._manufacturer} {self._device_id}",
             "manufacturer": self._manufacturer,

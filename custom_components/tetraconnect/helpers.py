@@ -1,15 +1,15 @@
-"""Several unils and tool helping handling of tetraHAconnect."""
+"""Several unils and tool helping handling of tetraconnect."""
 
 import logging
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class TetrahaconnectHelpers:
+class TetraconnectHelpers:
     """Class for any helper method, that is not needed for a specific purpose only."""
 
     def __init__(self, coordinator) -> None:
-        """Initialize tetraHAconnectHelpers."""
+        """Initialize tetraconnectHelpers."""
         self.coordinator = coordinator
 
     def update_connection_status(self, status):

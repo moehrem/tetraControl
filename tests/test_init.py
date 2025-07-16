@@ -1,18 +1,18 @@
 import pytest
 
-from custom_components.tetraHAconnect import async_setup_entry, async_unload_entry
+from custom_components.tetraconnect import async_setup_entry, async_unload_entry
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 
 
 @pytest.fixture
 def mock_config_entry() -> ConfigEntry:
-    """Return a mock ConfigEntry for tetraHAconnect."""
+    """Return a mock ConfigEntry for tetraconnect."""
     return ConfigEntry(
         version=1,
         minor_version=0,
-        domain="tetrahaconnect",
-        title="Test tetraHAconnect",
+        domain="tetraconnect",
+        title="Test tetraconnect",
         data={
             "manufacturer": "Motorola",
             "serial_port": "/dev/ttyUSB0",
@@ -31,7 +31,7 @@ def mock_config_entry() -> ConfigEntry:
 async def test_async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry):
     result = await async_setup_entry(hass, config_entry)
     assert result is True
-    assert "tetrahaconnect" in hass.data
+    assert "tetraconnect" in hass.data
 
 
 @pytest.mark.asyncio

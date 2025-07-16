@@ -1,4 +1,4 @@
-# """Sensor for any unknown data in tetraHAconnect integration."""
+# """Sensor for any unknown data in tetraconnect integration."""
 
 # from homeassistant.helpers.entity import EntityCategory
 
@@ -6,7 +6,7 @@
 
 
 # class UnknownSensor(TetraBaseSensor):
-#     """Sensor for unknown data in tetraHAconnect integration."""
+#     """Sensor for unknown data in tetraconnect integration."""
 
 #     def __init__(self, coordinator, key, data) -> None:
 #         """Initialize the CTSDRS sensor."""

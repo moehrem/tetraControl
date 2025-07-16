@@ -1,4 +1,4 @@
-"""Sensor setup for tetraHAconnect integration."""
+"""Sensor setup for tetraconnect integration."""
 
 import logging
 
