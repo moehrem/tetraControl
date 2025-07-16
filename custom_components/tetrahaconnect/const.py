@@ -19,6 +19,14 @@ TETRA_DEFAULTS: dict[str, object] = {
 
 # Motorola specific constants
 BAUDRATE = 38400
+MOTOROLA_COMMANDS: dict[str, str] = {
+    "+CTSDSR": "multi",
+    "+GMM": "single",
+    "+GMR": "single",
+    "+GMI": "single",
+    "+CMEE": "single",
+    "+CME ERROR": "single",
+}
 MOTOROLA_VARIABLES_DEFAULTS: dict[str, object] = {
     # general
     "sds_command": "",
