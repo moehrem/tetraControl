@@ -202,6 +202,7 @@ class Motorola:
                     self._complete_messages.append(combined_line)
                     _LOGGER.debug("Received multi-line message: %s", combined_line)
                 else:
+                    line = line + "\r\n"  # adding line break to complete line again
                     self._incomplete_messages.append(line)
                     _LOGGER.debug(
                         "Multi-line message incomplete, added to incomplete_messages: %s",
