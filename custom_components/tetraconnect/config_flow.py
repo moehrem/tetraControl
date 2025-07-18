@@ -189,6 +189,7 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
             parsed_data[cmd] = resp
 
         for cmd, resp in parsed_data.items():
+            _LOGGER.debug("Config: Command: %s, Response: %s", cmd, resp)
             if cmd == "AT+GMI?":
                 device_manufacturer = resp.split(":")[1].strip()
                 # check manufacturer
@@ -222,6 +223,11 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
         user_manufacturer = self.config_entry.manufacturer.strip().lower()
 
         if device_manufacturer.lower() != user_manufacturer.lower():
+            _LOGGER.error(
+                "Manufacturer mismatch! device confirms: %s, user has entered: %s",
+                device_manufacturer,
+                user_manufacturer,
+            )
             raise ValueError(
                 f"Manufacturer mismatch: {device_manufacturer} != {user_manufacturer}"
             )
