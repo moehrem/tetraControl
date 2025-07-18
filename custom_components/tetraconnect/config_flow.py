@@ -1,20 +1,20 @@
 """Config flow to configure the tetraconnect integration."""
 
 import asyncio
+import logging
+import os
 from dataclasses import dataclass
 from pathlib import Path
-import os
-import logging
 
 import serial
-import serial_asyncio
+import serial_asyncio  # type: ignore
 import voluptuous as vol
 
 from homeassistant.config_entries import (
     ConfigFlow,
     ConfigFlowResult,
-    ConfigEntryNotReady,
 )
+from homeassistant.exceptions import ConfigEntryNotReady
 
 from .const import DOMAIN, MANUFACTURERS_LIST, VERSION, MINOR_VERSION, PATCH_VERSION
 
@@ -55,9 +55,9 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
             self.errors = {}
 
             # set user input variables
-            self.config_entry.manufacturer = user_input["manufacturer"]
-            self.config_entry.serial_port = user_input["serial_port"]
-            self.config_entry.baudrate = user_input["baudrate"]
+            self.config_entry.manufacturer = str(user_input["manufacturer"])
+            self.config_entry.serial_port = str(user_input["serial_port"])
+            self.config_entry.baudrate = int(str(user_input["baudrate"]))
 
             try:
                 await self._request_device_data(self.config_entry)
@@ -102,7 +102,7 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def _get_serial_ports(self) -> list[str]:
         """Return a filtered list of usable serial ports on the system."""
-        devices = []
+        devices: list[str] = []
 
         # patterns to match serial devices
         serial_patterns = [
@@ -157,67 +157,74 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
             ) from e
 
         # send initial commands to the device
-        raw_data = {}
         for cmd in device_commands:
             writer.write(cmd.encode("utf-8"))
             await asyncio.sleep(0.1)
-            await writer.drain()
-            response = b""
-            try:
-                while True:
-                    chunk = await asyncio.wait_for(reader.read(1024), timeout=5)
-                    if not chunk:
-                        break
-                    response += chunk
-                    if response.endswith(b"\r\n"):
-                        break
-                raw_data[cmd] = response.strip()
-            except TimeoutError:
-                _LOGGER.error("Response timeout for command: %s", cmd.strip())
-                raw_data[cmd] = b""
+
+        await writer.drain()
+        response = b""
+        response = await asyncio.wait_for(reader.read(1024), timeout=5)
 
         writer.close()
         await writer.wait_closed()
 
         # parse response
-        self._parse_init_data(raw_data)
+        self._parse_init_data(response)
 
-    def _parse_init_data(self, raw_data) -> None:
+    def _parse_init_data(self, response) -> None:
         """Parse the initial response to extract manufacturer, and device ID."""
 
         device_manufacturer = "Unknown"
         device_id = "Unknown"
         device_revision = "Unknown"
-        parsed_data = {}
 
-        for cmd, resp in raw_data.items():
-            resp = resp.decode("utf-8").strip()
-            cmd = cmd.replace("\r\n", "").strip()
-            parsed_data[cmd] = resp
+        response = response.decode("utf-8").strip()
+        _LOGGER.debug("Config: Raw response: %s", response)
 
-        for cmd, resp in parsed_data.items():
-            _LOGGER.debug("Config: Command: %s, Response: %s", cmd, resp)
-            if cmd == "AT+GMI?":
-                device_manufacturer = resp.split(":")[1].strip()
-                # check manufacturer
+        response_lines = response.split("\r\n")
+
+        for line in response_lines:
+            if line.startswith("+GMI") and ":" in line:
+                device_manufacturer = line.split(":", 1)[1].strip()
                 self._check_manufacturer(device_manufacturer)
-            elif cmd == "AT+GMM?":
-                device_id = resp.split(":")[1].strip().split(",")[1]
-            elif cmd == "AT+GMR?":
-                device_revision = resp.split(":")[1].strip()
-            elif cmd.startswith("AT+CTSP"):
-                if resp != "OK":
-                    _LOGGER.warning(
-                        "Service profile command %s failed with response: %s",
-                        cmd,
-                        resp,
-                    )
-                _LOGGER.debug(
-                    "Service profile command %s sucessful for device %s (%s)",
-                    cmd,
-                    device_id,
-                    device_manufacturer,
-                )
+            elif line.startswith("+GMM") and ":" in line:
+                parts = line.split(":", 1)[1].strip().split(",")
+                if len(parts) > 1:
+                    device_id = parts[1]
+            elif line.startswith("+GMR") and ":" in line:
+                device_revision = line.split(":", 1)[1].strip()
+            # elif line.startswith("AT+CTSP"):
+            #     message = line.split(":", 1)
+            #     if message[1].strip() != "OK":
+            #         _LOGGER.warning(
+            #             "Service profile command %s failed with response: %s",
+            #             line,
+            #             message[1].strip(),
+            #         )
+
+        # for cmd, resp in parsed_data.items():
+        #     _LOGGER.debug("Config: Command: %s, Response: %s", cmd, resp)
+        #     if cmd == "AT+GMI?":
+        #         device_manufacturer = resp.split(":")[1].strip()
+        #         # check manufacturer
+        #         self._check_manufacturer(device_manufacturer)
+        #     elif cmd == "AT+GMM?":
+        #         device_id = resp.split(":")[1].strip().split(",")[1]
+        #     elif cmd == "AT+GMR?":
+        #         device_revision = resp.split(":")[1].strip()
+        #     elif cmd.startswith("AT+CTSP"):
+        #         if resp != "OK":
+        #             _LOGGER.warning(
+        #                 "Service profile command %s failed with response: %s",
+        #                 cmd,
+        #                 resp,
+        #             )
+        #         _LOGGER.debug(
+        #             "Service profile command %s sucessful for device %s (%s)",
+        #             cmd,
+        #             device_id,
+        #             device_manufacturer,
+        #         )
 
         self.config_entry.model = device_id
         self.config_entry.device_id = device_id
