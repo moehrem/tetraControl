@@ -11,7 +11,7 @@ import threading
 import time
 
 # config
-SERIAL_PORT = "/dev/pts/6"
+SERIAL_PORT = "/dev/pts/5"
 BAUDRATE = 38400
 TIMEOUT = 1
 
