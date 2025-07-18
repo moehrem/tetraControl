@@ -162,8 +162,15 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
             writer.write(cmd.encode("utf-8"))
             await asyncio.sleep(0.1)
             await writer.drain()
+            response = b""
             try:
-                response = await asyncio.wait_for(reader.read(1024), timeout=5)
+                while True:
+                    chunk = await asyncio.wait_for(reader.read(1024), timeout=5)
+                    if not chunk:
+                        break
+                    response += chunk
+                    if response.endswith(b"\r\n"):
+                        break
                 raw_data[cmd] = response.strip()
             except TimeoutError:
                 _LOGGER.error("Response timeout for command: %s", cmd.strip())
