@@ -172,7 +172,7 @@ class COMManager:
                     asyncio.get_running_loop().create_future()
                 )
                 self.transport.write(cmd.encode())
-                asyncio.sleep(0.1)
+                await asyncio.sleep(0.1)
                 _LOGGER.debug("Waiting for response to command: %s", cmd.strip())
                 try:
                     response = await asyncio.wait_for(
