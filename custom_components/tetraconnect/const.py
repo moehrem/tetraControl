@@ -4,7 +4,7 @@
 DOMAIN = "tetraconnect"
 VERSION = "0"
 MINOR_VERSION = "3"
-PATCH_VERSION = "10"
+PATCH_VERSION = "11"
 MANUFACTURERS_LIST = ["Motorola"]
 SLEEP_TIME_CONNECTION_CHECK = 10  # Sleep time in seconds between connection checks
 MAX_RETRY_ATTEMPTS = 5  # Maximum number of attempts to connect to the device
