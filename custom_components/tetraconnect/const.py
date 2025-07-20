@@ -9,16 +9,17 @@ MANUFACTURERS_LIST = ["Motorola"]
 SLEEP_TIME_CONNECTION_CHECK = 10  # Sleep time in seconds between connection checks
 MAX_RETRY_ATTEMPTS = 5  # Maximum number of attempts to connect to the device
 SLEEP_TIME_RETRY = 5  # Sleep time in seconds between retries
-
+BAUDRATE = 38400
 TETRA_DEFAULTS: dict[str, object] = {
     # general
     "tetra_command": "",
     "tetra_command_desc": "",
     "tetra_content": "",
 }
+MQTT_TOPIC_DEFAULT = "tetraconnect"
+
 
 # Motorola specific constants
-BAUDRATE = 38400
 MOTOROLA_COMMANDS: dict[str, str] = {
     "+CTSDSR": "multi",
     "+GMM": "single",
