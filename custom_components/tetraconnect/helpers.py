@@ -60,9 +60,11 @@ class TetraconnectHelpers:
 
         try:
             # Only include keys with non-empty, non-None, non-zero values
-            message: dict[str, str] = {
-                k: v for k, v in data_dict.items() if v not in ("", 0, None)
-            }
+            # message: dict[str, str] = {
+            #     k: v for k, v in data_dict.items() if v not in ("", 0, None)
+            # }
+
+            message: dict[str, str] = dict(data_dict)
 
             if next(iter(message), None) != "sds_command":
                 first_key = next(iter(message), None)

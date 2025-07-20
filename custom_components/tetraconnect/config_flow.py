@@ -16,7 +16,14 @@ from homeassistant.config_entries import (
 )
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .const import DOMAIN, MANUFACTURERS_LIST, VERSION, MINOR_VERSION, PATCH_VERSION
+from .const import (
+    DOMAIN,
+    MANUFACTURERS_LIST,
+    VERSION,
+    MINOR_VERSION,
+    PATCH_VERSION,
+    MQTT_TOPIC_DEFAULT,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -86,17 +93,34 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
 
         ports = await self.hass.async_add_executor_job(self._get_serial_ports)
 
+        # Default values for first form display
+        mqtt_enabled = True
+        topic_default = MQTT_TOPIC_DEFAULT
+        if hasattr(self, "hass") and hasattr(self.hass, "data"):
+            user_input = getattr(self, "user_input", None)
+        else:
+            user_input = None
+
+        # Try to get previous user input if available
+        if user_input is None:
+            user_input = {}
+        mqtt_enabled = user_input.get("mqtt", True)
+        topic_value = user_input.get("topic", topic_default)
+
+        schema_dict = {
+            vol.Required("manufacturer"): vol.In(MANUFACTURERS_LIST),
+            vol.Required("serial_port"): vol.In(ports),
+            vol.Required("baudrate", default=38400): vol.All(
+                vol.Coerce(int), vol.Range(min=300, max=115200)
+            ),
+            vol.Optional("mqtt", default=True): bool,
+        }
+        if mqtt_enabled:
+            schema_dict[vol.Required("topic", default=topic_value)] = str
+
         return self.async_show_form(
             step_id="user",
-            data_schema=vol.Schema(
-                {
-                    vol.Required("manufacturer"): vol.In(MANUFACTURERS_LIST),
-                    vol.Required("serial_port"): vol.In(ports),
-                    vol.Required("baudrate", default=38400): vol.All(
-                        vol.Coerce(int), vol.Range(min=300, max=115200)
-                    ),
-                }
-            ),
+            data_schema=vol.Schema(schema_dict),
             errors=self.errors,
         )
 
@@ -201,30 +225,6 @@ class TetraconnectConfigFlow(ConfigFlow, domain=DOMAIN):
             #             line,
             #             message[1].strip(),
             #         )
-
-        # for cmd, resp in parsed_data.items():
-        #     _LOGGER.debug("Config: Command: %s, Response: %s", cmd, resp)
-        #     if cmd == "AT+GMI?":
-        #         device_manufacturer = resp.split(":")[1].strip()
-        #         # check manufacturer
-        #         self._check_manufacturer(device_manufacturer)
-        #     elif cmd == "AT+GMM?":
-        #         device_id = resp.split(":")[1].strip().split(",")[1]
-        #     elif cmd == "AT+GMR?":
-        #         device_revision = resp.split(":")[1].strip()
-        #     elif cmd.startswith("AT+CTSP"):
-        #         if resp != "OK":
-        #             _LOGGER.warning(
-        #                 "Service profile command %s failed with response: %s",
-        #                 cmd,
-        #                 resp,
-        #             )
-        #         _LOGGER.debug(
-        #             "Service profile command %s sucessful for device %s (%s)",
-        #             cmd,
-        #             device_id,
-        #             device_manufacturer,
-        #         )
 
         self.config_entry.model = device_id
         self.config_entry.device_id = device_id
