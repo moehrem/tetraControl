@@ -200,41 +200,9 @@ class COMManager:
                     resp.decode("utf-8").strip().replace("\r\n", ""),
                 )
 
-        # parse service commands
-        # self._parse_tetra_service_commands(raw_data)
-
         _LOGGER.info(
             "##### TETRA services initialized successfully on %s #####", self.com_port
         )
-
-    # def _parse_tetra_service_commands(self, raw_data) -> None:
-    #     """Parse the initial response to extract manufacturer, device ID, and revision."""
-
-    #     for cmd, resp in raw_data.items():
-    #         # init defaults
-    #         for key, default in TETRA_DEFAULTS.items():
-    #             self._tetra_defaults[key] = default
-    #         parsed_data = {}
-
-    #         self._tetra_defaults["tetra_command"] = (
-    #             cmd.strip().replace("\r\n", "").replace("AT+", "").split("=")[0]
-    #         )
-    #         self._tetra_defaults["tetra_message"] = (
-    #             cmd.strip().replace("\r\n", "").split("=")[1] if "=" in cmd else ""
-    #         )
-    #         resp = resp.decode("utf-8").strip()
-    #         parsed_data = {
-    #             self._tetra_defaults["tetra_command"]: self._tetra_defaults[
-    #                 "tetra_message"
-    #             ],
-    #             "Status": resp,
-    #         }
-    #         self.helpers.update_entities(parsed_data)
-    #         _LOGGER.debug(
-    #             "Parsed TETRA command: %s with response: %s",
-    #             self._tetra_defaults["tetra_command"],
-    #             resp,
-    #         )
 
 
 class SerialHandler(asyncio.Protocol):
